@@ -6,12 +6,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, hasAccess, refreshUserData } = useAuth()
     const navigate = useNavigate()
 
-    // Refresh user data on mount to prevent stale permissions
+    // Force permission refresh on mount to prevent stale permissions
     useEffect(() => {
-        if (user) {
-            refreshUserData()
+        const checkAccess = async () => {
+            if (user) {
+                await refreshUserData()
+            }
         }
-    }, [])
+        checkAccess()
+    }, [user?.uid]) // Re-run when user ID changes
 
     // Check authentication
     if (!user) {
@@ -65,7 +68,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
                         </div>
                         <h2 className="text-2xl font-bold text-orange-600 mb-4">Admin Access Restricted</h2>
                         <p className="text-gray-600 mb-6">
-                            Your admin access has been disabled. Please contact the Super Administrator for approval.
+                            Admin access is restricted. Please contact Super Admin for approval or complete subscription.
                         </p>
                         <button
                             onClick={() => navigate('/contact')}

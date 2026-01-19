@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
     BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -6,11 +6,10 @@ import {
     RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts'
 import {
-    Shield, Clock, CheckCircle, XCircle, AlertTriangle,
+    Shield, Clock, CheckCircle, AlertTriangle,
     TrendingUp, Users, MapPin, Activity, FileText, Filter
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { Link } from 'react-router-dom'
 import StatCard from '../components/StatCard'
 import ChartCard from '../components/ChartCard'
 import FilterPanel from '../components/FilterPanel'
@@ -33,9 +32,7 @@ import {
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
 
 const AdminDashboard = () => {
-    const { user, hasAccess, refreshUserData } = useAuth()
-    const [accessDenied, setAccessDenied] = useState(false)
-    const [denialReason, setDenialReason] = useState(null)
+    const { user } = useAuth()
     const [filters, setFilters] = useState({
         state: 'all',
         city: 'all',
@@ -43,50 +40,6 @@ const AdminDashboard = () => {
         month: 'all',
         year: 'all'
     })
-
-    // Check admin access on mount and refresh data
-    useEffect(() => {
-        if (user) {
-            refreshUserData().then(() => {
-                const accessStatus = hasAccess()
-                if (!accessStatus.valid) {
-                    setAccessDenied(true)
-                    setDenialReason(accessStatus.reason)
-                }
-            })
-        }
-    }, [user])
-
-    // If access is denied, show restriction message
-    if (accessDenied) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-6">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="glass-card p-8 max-w-md text-center"
-                >
-                    <div className="inline-flex items-center justify-center p-4 bg-red-100 rounded-full mb-4">
-                        <XCircle className="w-12 h-12 text-red-600" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Admin Access Restricted</h2>
-                    <p className="text-gray-600 mb-6">
-                        {denialReason === 'admin_disabled'
-                            ? 'Your admin access is restricted. Please contact Super Admin for approval.'
-                            : 'Your admin access has been disabled. Please contact Super Admin for assistance.'}
-                    </p>
-                    <div className="space-y-3">
-                        <Link
-                            to="/contact"
-                            className="block w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                        >
-                            Contact Support
-                        </Link>
-                    </div>
-                </motion.div>
-            </div>
-        )
-    }
 
     // Get filtered data
     const totalCrimes = getTotalCrimes(filters)

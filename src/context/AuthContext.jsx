@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
                 trialsRemaining: actualRole === 'USER' ? 3 : 0,
                 trialStartDate: null,
                 trialExpiryDate: null,
-                subscriptionStatus: actualRole === 'USER' ? 'none' : 'active', // Admins don't need subscription
+                subscriptionStatus: 'none', // All roles start with no subscription
                 subscriptionPlan: null,
                 subscriptionStartDate: null,
                 subscriptionExpiryDate: null,
@@ -213,14 +213,16 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    // CENTRALIZED ACCESS CHECK - ROLE-FIRST LOGIC
+    // CENTRALIZED ACCESS CHECK - STRICT PRIORITY ORDER (NO EXCEPTIONS)
     const hasAccess = () => {
         if (!user) return { valid: false, reason: 'not_authenticated' }
 
         // Priority 1: Premium override bypasses everything
-        if (user.premiumOverride) return { valid: true, reason: null }
+        if (user.premiumOverride === true) {
+            return { valid: true, reason: null }
+        }
 
-        // Priority 2: Active subscription
+        // Priority 2: Active subscription (not expired)
         if (user.subscriptionStatus === 'active') {
             const expiryDate = user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) : null
             if (!expiryDate || expiryDate > new Date()) {
@@ -229,22 +231,40 @@ export const AuthProvider = ({ children }) => {
         }
 
         // Priority 3: SUPER_ADMIN always has access
-        if (user.role === 'SUPER_ADMIN') return { valid: true, reason: null }
+        if (user.role === 'SUPER_ADMIN') {
+            return { valid: true, reason: null }
+        }
 
-        // Priority 4: ADMIN role - requires explicit enablement OR premium override
+        // Priority 4: ADMIN role - MUST have subscription OR accessEnabled OR premiumOverride
         if (user.role === 'ADMIN') {
-            if (user.accessEnabled === true || user.premiumOverride === true) {
+            // Check if admin has active subscription
+            if (user.subscriptionStatus === 'active') {
+                const expiryDate = user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) : null
+                if (!expiryDate || expiryDate > new Date()) {
+                    return { valid: true, reason: null }
+                }
+            }
+            // Check if admin has explicit access grant
+            if (user.accessEnabled === true) {
                 return { valid: true, reason: null }
             }
+            // Check if admin has premium override (redundant but explicit)
+            if (user.premiumOverride === true) {
+                return { valid: true, reason: null }
+            }
+            // Admin has none of the above - BLOCK ACCESS
             return { valid: false, reason: 'admin_disabled' }
         }
 
         // Priority 5: USER role - check trialsRemaining
         if (user.role === 'USER') {
-            if (user.trialsRemaining > 0) return { valid: true, reason: null }
+            if (user.trialsRemaining > 0) {
+                return { valid: true, reason: null }
+            }
             return { valid: false, reason: 'trials_exhausted' }
         }
 
+        // Unknown role or condition - deny access
         return { valid: false, reason: 'unknown' }
     }
 
@@ -364,7 +384,7 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    // Refresh user data from Firestore - for real-time state sync
+    // Refresh user data from Firestore - FORCE COMPLETE STATE SYNC
     const refreshUserData = async () => {
         if (!user) return
 
@@ -374,15 +394,26 @@ export const AuthProvider = ({ children }) => {
 
             if (userDoc.exists()) {
                 const userData = userDoc.data()
+                // Force complete state update - ALL fields
                 setUser(prev => ({
-                    ...prev,
+                    uid: prev.uid,
+                    email: prev.email,
+                    displayName: userData.displayName || prev.displayName,
+                    role: userData.role || prev.role,
+                    region: userData.region || prev.region,
+                    preferences: userData.preferences || prev.preferences,
+                    createdAt: userData.createdAt || prev.createdAt,
+                    // Force update ALL subscription and access fields
                     trialsRemaining: userData.trialsRemaining !== undefined ? userData.trialsRemaining : prev.trialsRemaining,
+                    trialStartDate: userData.trialStartDate || prev.trialStartDate,
+                    trialExpiryDate: userData.trialExpiryDate || prev.trialExpiryDate,
                     subscriptionStatus: userData.subscriptionStatus || prev.subscriptionStatus,
                     subscriptionPlan: userData.subscriptionPlan || prev.subscriptionPlan,
                     subscriptionStartDate: userData.subscriptionStartDate || prev.subscriptionStartDate,
                     subscriptionExpiryDate: userData.subscriptionExpiryDate || prev.subscriptionExpiryDate,
                     accessEnabled: userData.accessEnabled !== undefined ? userData.accessEnabled : prev.accessEnabled,
-                    premiumOverride: userData.premiumOverride || prev.premiumOverride
+                    premiumOverride: userData.premiumOverride !== undefined ? userData.premiumOverride : prev.premiumOverride,
+                    lastDashboardAccess: userData.lastDashboardAccess || prev.lastDashboardAccess
                 }))
             }
         } catch (error) {

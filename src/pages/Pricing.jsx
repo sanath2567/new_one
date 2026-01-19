@@ -38,13 +38,25 @@ const Pricing = () => {
 
     const handlePaymentSuccess = async (plan) => {
         try {
+            setLoading(true)
+            // Update subscription in database
             await updateSubscription(plan.name.toLowerCase(), plan.duration)
-            // Refresh user data to sync subscription state
+
+            // Force immediate state refresh from database
             await refreshUserData()
+
+            setLoading(false)
             alert(`Payment successful! Your ${plan.name} subscription is now active.`)
-            navigate('/dashboard')
+
+            // Navigate to appropriate dashboard
+            if (user?.role === 'ADMIN') {
+                navigate('/admin')
+            } else {
+                navigate('/dashboard')
+            }
         } catch (err) {
             console.error('Error updating subscription:', err)
+            setLoading(false)
             alert('Payment received but failed to update subscription. Please contact support.')
         }
     }

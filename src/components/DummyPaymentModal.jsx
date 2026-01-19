@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CreditCard, X, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { CreditCard, X, CheckCircle, XCircle, Loader, Lock } from 'lucide-react'
 
 const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
     const [processing, setProcessing] = useState(false)
@@ -14,7 +14,7 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
         setProcessing(true)
 
         // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
         setPaymentStatus('success')
         setProcessing(false)
@@ -23,14 +23,14 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
         setTimeout(() => {
             onSuccess(plan)
             handleClose()
-        }, 2000)
+        }, 2500)
     }
 
     const handleSimulateFailure = async () => {
         setProcessing(true)
 
         // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
         setPaymentStatus('failed')
         setProcessing(false)
@@ -55,51 +55,100 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black bg-opacity-60"
+                onClick={handleClose}
+            >
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="glass-card p-6 max-w-md w-full relative"
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '100%', opacity: 0 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 max-w-md w-full relative overflow-hidden"
                 >
+                    {/* Razorpay-style header gradient */}
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600"></div>
+
                     {/* Close Button */}
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
                         disabled={processing}
                     >
                         <X className="w-5 h-5" />
                     </button>
 
-                    {/* Payment Status Display */}
+                    {/* Success Animation */}
                     {paymentStatus === 'success' && (
-                        <div className="text-center py-8">
-                            <div className="inline-flex items-center justify-center p-4 bg-green-100 rounded-full mb-4">
-                                <CheckCircle className="w-12 h-12 text-green-600" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
-                            <p className="text-gray-600">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="text-center py-8"
+                        >
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1, rotate: 360 }}
+                                transition={{ type: 'spring', duration: 0.6 }}
+                                className="inline-flex items-center justify-center p-4 bg-green-100 rounded-full mb-4"
+                            >
+                                <CheckCircle className="w-16 h-16 text-green-600" />
+                            </motion.div>
+                            <motion.h3
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="text-2xl font-bold text-gray-800 mb-2"
+                            >
+                                Payment Successful!
+                            </motion.h3>
+                            <motion.p
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-gray-600"
+                            >
                                 Your {plan?.name} subscription has been activated.
-                            </p>
-                        </div>
+                            </motion.p>
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: '100%' }}
+                                transition={{ delay: 0.5, duration: 2 }}
+                                className="h-1 bg-green-500 rounded-full mt-4"
+                            />
+                        </motion.div>
                     )}
 
+                    {/* Failure Animation */}
                     {paymentStatus === 'failed' && (
-                        <div className="text-center py-8">
-                            <div className="inline-flex items-center justify-center p-4 bg-red-100 rounded-full mb-4">
-                                <XCircle className="w-12 h-12 text-red-600" />
-                            </div>
+                        <motion.div
+                            initial={{ x: 0 }}
+                            animate={{ x: [-10, 10, -10, 10, 0] }}
+                            transition={{ duration: 0.5 }}
+                            className="text-center py-8"
+                        >
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: [0, 1.2, 1] }}
+                                transition={{ duration: 0.5 }}
+                                className="inline-flex items-center justify-center p-4 bg-red-100 rounded-full mb-4"
+                            >
+                                <XCircle className="w-16 h-16 text-red-600" />
+                            </motion.div>
                             <h3 className="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h3>
                             <p className="text-gray-600 mb-6">
                                 There was an issue processing your payment. Please try again.
                             </p>
                             <button
                                 onClick={handleRetry}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all transform hover:scale-105 shadow-md"
                             >
                                 Try Again
                             </button>
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* Payment Form */}
@@ -107,26 +156,36 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                         <>
                             {/* Razorpay-style Header */}
                             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
-                                <div className="p-2 bg-blue-100 rounded-full">
-                                    <CreditCard className="w-6 h-6 text-blue-600" />
+                                <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg">
+                                    <CreditCard className="w-6 h-6 text-white" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-800">Razorpay Payment Gateway</h3>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-xl font-bold text-gray-800">Razorpay</h3>
+                                        <Lock className="w-4 h-4 text-green-600" />
+                                    </div>
                                     <p className="text-sm text-gray-600">
                                         {plan?.name} - ₹{plan?.price}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <p className="text-sm text-yellow-800">
-                                    <strong>Demo Mode:</strong> This is a simulated payment gateway. Use the buttons below to simulate success or failure.
+                            {/* Demo Mode Banner */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg"
+                            >
+                                <p className="text-sm text-yellow-800 flex items-center gap-2">
+                                    <span className="font-bold">⚡ Demo Mode:</span>
+                                    <span>Simulated payment gateway</span>
                                 </p>
-                            </div>
+                            </motion.div>
 
                             <form className="space-y-4">
+                                {/* Cardholder Name */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Cardholder Name
                                     </label>
                                     <input
@@ -134,33 +193,38 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                         value={cardholderName}
                                         onChange={(e) => setCardholderName(e.target.value)}
                                         placeholder="John Doe"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                         disabled={processing}
                                     />
                                 </div>
 
+                                {/* Card Number */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Card Number
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={cardNumber}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()
-                                            if (value.replace(/\s/g, '').length <= 16) {
-                                                setCardNumber(value)
-                                            }
-                                        }}
-                                        placeholder="1234 5678 9012 3456"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        disabled={processing}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={cardNumber}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()
+                                                if (value.replace(/\s/g, '').length <= 16) {
+                                                    setCardNumber(value)
+                                                }
+                                            }}
+                                            placeholder="1234 5678 9012 3456"
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                                            disabled={processing}
+                                        />
+                                        <CreditCard className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    </div>
                                 </div>
 
+                                {/* Expiry and CVV */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             Expiry Date
                                         </label>
                                         <input
@@ -173,17 +237,17 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                                 }
                                             }}
                                             placeholder="MM/YY"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                             disabled={processing}
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             CVV
                                         </label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             value={cvv}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, '')
@@ -192,7 +256,7 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                                 }
                                             }}
                                             placeholder="123"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                             disabled={processing}
                                         />
                                     </div>
@@ -200,7 +264,7 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
 
                                 {/* Simulation Buttons */}
                                 <div className="pt-4 border-t border-gray-200">
-                                    <p className="text-sm text-gray-600 mb-3 text-center">
+                                    <p className="text-sm text-gray-600 mb-3 text-center font-medium">
                                         Choose payment outcome:
                                     </p>
                                     <div className="grid grid-cols-2 gap-3">
@@ -208,9 +272,9 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             type="button"
                                             onClick={handleSimulateSuccess}
                                             disabled={processing}
-                                            className={`px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${processing
-                                                    ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg'
+                                            className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all transform ${processing
+                                                    ? 'bg-gray-300 cursor-not-allowed'
+                                                    : 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
                                                 }`}
                                         >
                                             {processing ? (
@@ -221,7 +285,7 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             ) : (
                                                 <>
                                                     <CheckCircle className="w-5 h-5" />
-                                                    Simulate Success
+                                                    Success
                                                 </>
                                             )}
                                         </button>
@@ -230,9 +294,9 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             type="button"
                                             onClick={handleSimulateFailure}
                                             disabled={processing}
-                                            className={`px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${processing
-                                                    ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg'
+                                            className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all transform ${processing
+                                                    ? 'bg-gray-300 cursor-not-allowed'
+                                                    : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
                                                 }`}
                                         >
                                             {processing ? (
@@ -243,17 +307,23 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             ) : (
                                                 <>
                                                     <XCircle className="w-5 h-5" />
-                                                    Simulate Failure
+                                                    Failure
                                                 </>
                                             )}
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Secure Payment Badge */}
+                                <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
+                                    <Lock className="w-3 h-3" />
+                                    <span>Secured by Razorpay SSL encryption</span>
+                                </div>
                             </form>
                         </>
                     )}
                 </motion.div>
-            </div>
+            </motion.div>
         </AnimatePresence>
     )
 }
