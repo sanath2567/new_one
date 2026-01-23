@@ -202,11 +202,18 @@ const AdminDashboard = () => {
                                 {crimeHotspots.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
-                                        fill={entry.name.includes('Hotspot') ? '#ef4444' : '#10b981'}
+                                        fill={entry.name === 'Hotspot Areas' ? '#ef4444' : '#10b981'}
                                     />
                                 ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}
+                            />
                         </PieChart>
                     </ResponsiveContainer>
                 </ChartCard>
