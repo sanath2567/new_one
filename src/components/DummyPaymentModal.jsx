@@ -170,16 +170,19 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                 </div>
                             </div>
 
-                            {/* Demo Mode Banner */}
+                            {/* Demo Mode Banner with Test Credentials */}
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg"
+                                className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg"
                             >
-                                <p className="text-sm text-yellow-800 flex items-center gap-2">
-                                    <span className="font-bold">⚡ Demo Mode:</span>
-                                    <span>Simulated payment gateway</span>
-                                </p>
+                                <p className="text-sm text-yellow-800 font-bold mb-2">⚡ Demo Mode - Test Credentials</p>
+                                <div className="text-xs text-yellow-700 space-y-1">
+                                    <p><strong>Card Number:</strong> 4111 1111 1111 1111 (Visa)</p>
+                                    <p><strong>Expiry:</strong> Any future date (e.g., 12/25)</p>
+                                    <p><strong>CVV:</strong> Any 3 digits (e.g., 123)</p>
+                                    <p className="text-yellow-600 italic mt-2">Click "Success" or "Failure" to simulate payment outcome</p>
+                                </div>
                             </motion.div>
 
                             <form className="space-y-4">
@@ -273,8 +276,8 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             onClick={handleSimulateSuccess}
                                             disabled={processing}
                                             className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all transform ${processing
-                                                    ? 'bg-gray-300 cursor-not-allowed'
-                                                    : 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                                                ? 'bg-gray-300 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
                                                 }`}
                                         >
                                             {processing ? (
@@ -295,8 +298,8 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                                             onClick={handleSimulateFailure}
                                             disabled={processing}
                                             className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all transform ${processing
-                                                    ? 'bg-gray-300 cursor-not-allowed'
-                                                    : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                                                ? 'bg-gray-300 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
                                                 }`}
                                         >
                                             {processing ? (

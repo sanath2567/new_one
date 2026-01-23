@@ -21,7 +21,7 @@ const Navbar = () => {
                     <Link to="/" className="flex items-center space-x-2">
                         <Shield className="w-8 h-8 text-blue-600" />
                         <span className="text-xl font-bold gradient-text hidden md:block">
-                            Crime Rate 
+                            Crime Rate
                         </span>
                         <span className="text-xl font-bold gradient-text md:hidden">
                             Crime Analysis
@@ -56,16 +56,20 @@ const Navbar = () => {
                                     </Link>
                                 )}
 
-                                {/* ADMIN role - show only Admin Panel */}
+                                {/* ADMIN role - show only Admin Panel if they have access */}
                                 {user.role === 'ADMIN' && (
-                                    <Link
-                                        to="/admin"
-                                        className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
-                                    >
-                                        <Shield className="w-4 h-4" />
-                                        <span>Admin Panel</span>
-                                    </Link>
-                                )}
+                                    user.accessEnabled === true ||
+                                    user.premiumOverride === true ||
+                                    user.subscriptionStatus === 'active'
+                                ) && (
+                                        <Link
+                                            to="/admin"
+                                            className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
+                                        >
+                                            <Shield className="w-4 h-4" />
+                                            <span>Admin Panel</span>
+                                        </Link>
+                                    )}
 
                                 {/* SUPER_ADMIN role - show only Super Admin */}
                                 {user.role === 'SUPER_ADMIN' && (
@@ -159,16 +163,20 @@ const Navbar = () => {
                                     </Link>
                                 )}
 
-                                {/* ADMIN role - show only Admin Panel */}
+                                {/* ADMIN role - show only Admin Panel if they have access */}
                                 {user.role === 'ADMIN' && (
-                                    <Link
-                                        to="/admin"
-                                        className="block text-gray-700 hover:text-blue-600 transition-colors"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Admin Panel
-                                    </Link>
-                                )}
+                                    user.accessEnabled === true ||
+                                    user.premiumOverride === true ||
+                                    user.subscriptionStatus === 'active'
+                                ) && (
+                                        <Link
+                                            to="/admin"
+                                            className="block text-gray-700 hover:text-blue-600 transition-colors"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            Admin Panel
+                                        </Link>
+                                    )}
 
                                 {/* SUPER_ADMIN role - show only Super Admin */}
                                 {user.role === 'SUPER_ADMIN' && (

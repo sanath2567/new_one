@@ -72,8 +72,11 @@ const UserDashboard = () => {
 
     // Apply filters - only decrements trial if State is selected (USER role only)
     const handleApplyFilters = async () => {
-        // Check if State filter is selected
-        if (stagedFilters.state === 'all') {
+        // Check if user has premium access (subscription or premium override)
+        const hasPremiumAccess = user?.subscriptionStatus === 'active' || user?.premiumOverride === true
+
+        // For users WITHOUT premium access, require state selection
+        if (!hasPremiumAccess && stagedFilters.state === 'all') {
             setFilterMessage('⚠️ Please select a State to apply filters')
             return
         }
@@ -93,10 +96,13 @@ const UserDashboard = () => {
             }
 
             // Decrement trial count (only if USER, not subscribed, and State selected)
-            try {
-                await decrementTrialCount()
-            } catch (error) {
-                console.error('Error decrementing trial:', error)
+            // Premium users don't consume trials
+            if (!hasPremiumAccess) {
+                try {
+                    await decrementTrialCount()
+                } catch (error) {
+                    console.error('Error decrementing trial:', error)
+                }
             }
         }
 
@@ -166,7 +172,7 @@ const UserDashboard = () => {
                 onApply={handleApplyFilters}
                 showCityFilter={true}
                 showApplyButton={user?.role === 'USER'}
-                requireState={user?.role === 'USER'}
+                requireState={user?.role === 'USER' && user?.subscriptionStatus !== 'active' && !user?.premiumOverride}
                 userRole={user?.role}
             />
 
