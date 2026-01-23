@@ -73,6 +73,79 @@ const DummyPaymentModal = ({ isOpen, onClose, plan, onSuccess }) => {
                     {/* Razorpay-style header gradient */}
                     <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600"></div>
 
+                    {/* Processing Animation - Razorpay Style */}
+                    {processing && !paymentStatus && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-center py-12"
+                        >
+                            {/* Razorpay Logo Animation */}
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.1, 1],
+                                    rotate: [0, 5, -5, 0]
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="inline-flex items-center justify-center p-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-2xl mb-6"
+                            >
+                                <CreditCard className="w-12 h-12 text-white" />
+                            </motion.div>
+
+                            {/* Processing Text */}
+                            <motion.h3
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="text-2xl font-bold text-gray-800 mb-2"
+                            >
+                                Processing Payment
+                            </motion.h3>
+                            <p className="text-gray-600 mb-6">Please wait while we process your transaction...</p>
+
+                            {/* Animated Progress Bar */}
+                            <div className="max-w-xs mx-auto mb-6">
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: "0%" }}
+                                        animate={{ width: "100%" }}
+                                        transition={{ duration: 2, ease: "easeInOut" }}
+                                        className="h-full bg-gradient-to-r from-blue-600 to-indigo-600"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Shimmer Card Effect */}
+                            <motion.div
+                                animate={{
+                                    boxShadow: [
+                                        "0 0 20px rgba(59, 130, 246, 0.3)",
+                                        "0 0 40px rgba(59, 130, 246, 0.6)",
+                                        "0 0 20px rgba(59, 130, 246, 0.3)"
+                                    ]
+                                }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="inline-block px-8 py-4 bg-white rounded-lg border-2 border-blue-200"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Loader className="w-5 h-5 text-blue-600 animate-spin" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        Securing your payment...
+                                    </span>
+                                </div>
+                            </motion.div>
+
+                            {/* Security Badge */}
+                            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-6">
+                                <Lock className="w-3 h-3" />
+                                <span>256-bit SSL Encrypted</span>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {/* Close Button */}
                     <button
                         onClick={handleClose}

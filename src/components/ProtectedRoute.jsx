@@ -21,32 +21,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/login" replace />
     }
 
-    // Check if user's role is allowed for this route
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                <div className="glass-card p-8 max-w-md text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-                    <p className="text-gray-600 mb-6">
-                        You don't have permission to access this page. This dashboard is restricted to {allowedRoles.join(', ')} users only.
-                    </p>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="btn-primary"
-                    >
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
-    // Check access permissions using centralized hasAccess()
+    // CRITICAL: Check access permissions FIRST (before role check)
+    // This ensures disabled admins can't bypass access control
     const accessStatus = hasAccess()
 
     if (!accessStatus.valid) {
@@ -68,14 +44,22 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
                         </div>
                         <h2 className="text-2xl font-bold text-orange-600 mb-4">Admin Access Restricted</h2>
                         <p className="text-gray-600 mb-6">
-                            Admin access is restricted. Please contact Super Admin for approval or complete subscription.
+                            Your admin access is currently disabled. Please contact Super Admin for approval or purchase a subscription.
                         </p>
-                        <button
-                            onClick={() => navigate('/contact')}
-                            className="btn-primary"
-                        >
-                            Contact Support
-                        </button>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => navigate('/pricing')}
+                                className="btn-primary"
+                            >
+                                View Plans
+                            </button>
+                            <button
+                                onClick={() => navigate('/contact')}
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Contact Support
+                            </button>
+                        </div>
                     </div>
                 </div>
             )
@@ -99,6 +83,31 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
                         className="btn-primary"
                     >
                         Return Home
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    // NOW check if user's role is allowed for this route
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="glass-card p-8 max-w-md text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+                    <p className="text-gray-600 mb-6">
+                        You don't have permission to access this page. This dashboard is restricted to {allowedRoles.join(', ')} users only.
+                    </p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="btn-primary"
+                    >
+                        Go Back
                     </button>
                 </div>
             </div>
